@@ -32,10 +32,8 @@ $(function () {
             });
         },
         gradeTableGenerate: function (grades) {
-            console.log(grades[0].date);
-            console.log(grades[grades.length-1].date);
-            var dateFrom = new Date('2014-12-29');
-            var dateTo = new Date('2015-01-03');
+            var dateFrom = new Date(grades[0].date);
+            var dateTo = new Date(grades[grades.length - 1].date);
 
             var gradeTable = $('.table tbody');
             gradeTable.html('');
@@ -47,7 +45,7 @@ $(function () {
                 var dateFormat = d[i].getFullYear()
                     + '-' + pad(d[i].getMonth() + 1, 2)
                     + '-' + pad(d[i].getDate(), 2);
-                gradeTableRow += '<td>' + dateFormat + '</td>';
+                gradeTableRow += '<td data-date="' + dateFormat + '"></td>';
             }
 
             gradeTable.append('<tr>' + gradeTableRow + '</tr>');
@@ -55,7 +53,11 @@ $(function () {
             grades.forEach(this.insertGrades);
         },
         insertGrades: function (element, index, array) {
-            console.log(element);
+            var gradeTable = $('.table tbody');
+            var cell = $('[data-date="' + element.date + '"]', gradeTable);
+            if (cell.length > 0) {
+                cell.append(element.grade + ' ');
+            }
         }
     });
 });
