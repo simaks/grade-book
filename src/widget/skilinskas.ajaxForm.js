@@ -26,12 +26,12 @@ $(function () {
                 data: dataForm,
                 success: function (response) {
                     if (response.success) {
-                        that.gradeTableGenerate(response.result.grades);
+                        that.gradeTableGenerate(response.result.grades, response.result.subjects);
                     }
                 }
             });
         },
-        gradeTableGenerate: function (grades) {
+        gradeTableGenerate: function (grades, subjects) {
             var dateFrom = new Date(grades[0].date);
             var dateTo = new Date(grades[grades.length - 1].date);
 
@@ -48,13 +48,16 @@ $(function () {
                 gradeTableRow += '<td data-date="' + dateFormat + '"></td>';
             }
 
-            gradeTable.append('<tr>' + gradeTableRow + '</tr>');
+            for (var j = 0; j < subjects.length; j++) {
+                gradeTable.append('<tr data-subject="' + subjects[j].id + '"><th>'+subjects[j].name+'</th>' + gradeTableRow + '</tr>');
+            }
 
             grades.forEach(this.insertGrades);
         },
         insertGrades: function (element, index, array) {
             var gradeTable = $('.table tbody');
-            var cell = $('[data-date="' + element.date + '"]', gradeTable);
+            var cell = $('[data-subject="' + element.subjectId + '"] [data-date="' + element.date + '"]', gradeTable);
+            console.log(element);
             if (cell.length > 0) {
                 cell.append(element.grade + ' ');
             }
