@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <title>Grade-book by Skilinskas</title>
     <link rel="stylesheet" href="src/inc/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="src/style.css"/>
 </head>
 <body>
 
 <div class="container">
     <h1 class="text-center">Grade book</h1>
+
     <div class="row">
-        <div class="col-xs-12">
+        <div class="col-md-6 col-xs-12">
             <form action="http://localhost:8000/api/grades" method="get" id="get-grades-form">
                 <div class="row">
-                    <div class="col-xs-4">
+                    <div class="col-xs-6">
                         <div class="form-group">
                             <label for="get-grades-student" class="control-label">Student:</label>
                             <input id="get-grades-student" name="" class="form-control" type="text"/>
@@ -23,60 +25,75 @@
                             <input id="get-grades-subject" name="subject" class="form-control" type="text"/>
                         </div>
                     </div>
-                    <div class="col-xs-4">
+                    <div class="col-xs-6">
                         <div class="form-group">
                             <label for="get-grades-date-from" class="control-label">From:</label>
-                            <input id="get-grades-date-from" name="date_from" class="form-control" type="date" placeholder="yyyy-mm-dd" value="2011-01-01"/>
+                            <input id="get-grades-date-from" name="date_from" class="form-control" type="date"
+                                   placeholder="yyyy-mm-dd" value="2014-11-29"/>
                         </div>
                         <div class="form-group">
                             <label for="get-grades-date-to" class="control-label">To:</label>
-                            <input id="get-grades-date-to" name="date_to" class="form-control" type="date" placeholder="yyyy-mm-dd"/>
+                            <input id="get-grades-date-to" name="date_to" class="form-control" type="date"
+                                   placeholder="yyyy-mm-dd"/>
                         </div>
-                    </div>
-                    <div class="col-xs-4">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-info btn-block">Show grades</button>
             </form>
-            <div class="table-responsive">
-                <table class="table table-bordered text-center">
-                    <caption>Grade table</caption>
-                    <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>2</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>2</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+        </div>
+        <div class="col-md-6 col-xs-12">
+            <form action="http://localhost:8000/api/grades" method="post" id="add-grade-form">
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="add-grade-student" class="control-label">Student:</label>
+                            <input id="add-grade-student" name="" class="form-control" type="text"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-grade-subject" class="control-label">Subject:</label>
+                            <input id="add-grade-subject" name="subject" class="form-control" type="text"/>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="add-grade-date" class="control-label">Date:</label>
+                            <input id="add-grade-date" name="date_from" class="form-control" type="date"
+                                   placeholder="yyyy-mm-dd"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-grade-grade" class="control-label">Grade:</label>
+                            <input id="add-grade-grade" name="date_from" class="form-control" type="number"
+                                   min="0" max="10"/>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-warning btn-block">Add grade</button>
+            </form>
         </div>
     </div>
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <caption>Grade table</caption>
+            <tbody>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="grade-average-chart" style="width:100%; height:300px;"></div>
 </div>
 
 
 <script src="src/inc/jquery-2.1.1.min.js"></script>
 <script src="src/inc/jquery-ui.min.js"></script>
 <script src="src/inc/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://www.google.com/jsapi"></script>
 <script src="src/widget/skilinskas.ajaxForm.js"></script>
 <script src="src/start.js"></script>
 </body>
