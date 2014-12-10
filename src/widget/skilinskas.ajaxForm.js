@@ -17,8 +17,9 @@ $(function () {
                 vAxis: {gridlines: {count: 6}}
             };
 
+            this.getStudentsAjax();
+            this.getSubjectsAjax();
             this.submitGetGradesForm();
-
             this._on(this.getGradesForm, {
                 'submit': 'submitGetGradesForm'
             });
@@ -41,7 +42,7 @@ $(function () {
         getGradesAjax: function (dataForm) {
             var that = this;
             $.ajax({
-                url: this.baseUrl + '/api/grades',
+                url: this.baseUrl + '/api/get/grades',
                 dataType: 'json',
                 type: 'GET',
                 data: dataForm,
@@ -49,12 +50,43 @@ $(function () {
                     if (response.success && response.result.grades.length) {
                         var dateFrom = new Date(response.result.grades[0].date);
                         var dateTo = new Date(response.result.grades[response.result.grades.length - 1].date);
-                        that.gradeTableGenerate(response.result.grades, response.result.subjects, dateFrom, dateTo);
-                        that.gradeAverageChartGenerate(response.result.grades, response.result.subjects);
-                        that.updateStudentSelectInput(response.result.students);
-                        that.updateSubjectSelectInput(response.result.subjects);
+                        that.dataGrades = response.result.grades;
+                        that.gradeTableGenerate(that.dataGrades, that.dataSubjects, dateFrom, dateTo);
+                        that.gradeAverageChartGenerate(that.dataGrades, that.dataSubjects);
                     } else {
                         alert('Failed to get any grades.');
+                    }
+                }
+            });
+        },
+        getStudentsAjax: function () {
+            var that = this;
+            $.ajax({
+                url: this.baseUrl + '/api/get/students',
+                dataType: 'json',
+                type: 'GET',
+                success: function (response) {
+                    if (response.success && response.result.students.length) {
+                        that.dataStudents = response.result.students;
+                        that.updateStudentSelectInput(that.dataStudents);
+                    } else {
+                        alert('Failed to get any students.');
+                    }
+                }
+            });
+        },
+        getSubjectsAjax: function () {
+            var that = this;
+            $.ajax({
+                url: this.baseUrl + '/api/get/subjects',
+                dataType: 'json',
+                type: 'GET',
+                success: function (response) {
+                    if (response.success && response.result.subjects.length) {
+                        that.dataSubjects = response.result.subjects;
+                        that.updateSubjectSelectInput(that.dataSubjects);
+                    } else {
+                        alert('Failed to get any subjects.');
                     }
                 }
             });
@@ -63,7 +95,7 @@ $(function () {
             var that = this;
             $.ajax({
                 type: 'POST',
-                url: this.baseUrl + '/api/add_grade',
+                url: this.baseUrl + '/api/add_grades',
                 dataType: 'json',
                 data: dataForm,
                 success: function (response) {
