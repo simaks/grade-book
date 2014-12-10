@@ -98,7 +98,7 @@ $(function () {
             var that = this;
             $.ajax({
                 type: 'POST',
-                url: this.baseUrl + '/api/add_grades',
+                url: this.baseUrl + '/api/add/grade',
                 dataType: 'json',
                 data: dataForm,
                 success: function (response) {
