@@ -17,8 +17,6 @@ $(function () {
                 vAxis: {gridlines: {count: 6}}
             };
 
-            this.getStudentsAjax();
-            this.getSubjectsAjax();
             this.submitGetGradesForm();
             this._on(this.getGradesForm, {
                 'submit': 'submitGetGradesForm'
@@ -28,6 +26,8 @@ $(function () {
             });
         },
         submitGetGradesForm: function (event) {
+            this.getStudentsAjax();
+            this.getSubjectsAjax();
             if (typeof event != 'undefined') {
                 event.preventDefault();
             }
@@ -48,8 +48,8 @@ $(function () {
                 data: dataForm,
                 success: function (response) {
                     if (response.success && response.result.grades.length) {
-                        var dateFrom = new Date(response.result.grades[0].date);
-                        var dateTo = new Date(response.result.grades[response.result.grades.length - 1].date);
+                        var dateFrom = new Date(response.result.date_from);
+                        var dateTo = new Date(response.result.date_to);
                         that.dataGrades = response.result.grades;
                         that.gradeTableGenerate(that.dataGrades, that.dataSubjects, dateFrom, dateTo);
                         that.gradeAverageChartGenerate(that.dataGrades, that.dataSubjects);
@@ -137,8 +137,11 @@ $(function () {
 
             this.gradeTable.prepend('<tr class="table-dates">' + gradeTableHead + '</tr>');
 
+            var subjectToShow = $('.input-select-subject', this.getGradesForm).val();
             for (var j = 0; j < subjects.length; j++) {
-                this.gradeTable.append('<tr data-subject="' + subjects[j].id + '"><th>' + subjects[j].name + '</th>' + gradeTableRow + '</tr>');
+                if (subjectToShow == '*' || subjectToShow == subjects[j].id) {
+                    this.gradeTable.append('<tr data-subject="' + subjects[j].id + '"><th>' + subjects[j].name + '</th>' + gradeTableRow + '</tr>');
+                }
             }
 
             grades.forEach(this.insertGrades);
@@ -177,18 +180,22 @@ $(function () {
             }
         },
         updateStudentSelectInput: function (students) {
-            var options = '<option value="">-</option>';
+            var options = '<option value="*">*</option>';
             for (var i = 0; i < students.length; i++) {
                 options += '<option value="' + students[i].id + '">' + students[i].name + ' ' + students[i].surname + '</option>';
             }
-            this.inputSelectStudent.html(options);
+            if (this.inputSelectStudent.html() != options) {
+                this.inputSelectStudent.html(options);
+            }
         },
         updateSubjectSelectInput: function (subjects) {
-            var options = '<option value="">-</option>';
+            var options = '<option value="*">*</option>';
             for (var i = 0; i < subjects.length; i++) {
                 options += '<option value="' + subjects[i].id + '">' + subjects[i].name + '</option>';
             }
-            this.inputSelectSubject.html(options);
+            if (this.inputSelectSubject.html() != options) {
+                this.inputSelectSubject.html(options);
+            }
         }
     });
 });
