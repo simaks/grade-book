@@ -42,8 +42,7 @@ $(function () {
             var that = this;
             $.ajax({
                 url: this.baseUrl + '/api/grades',
-                dataType: 'JSONP',
-                jsonpCallback: 'callback',
+                dataType: 'json',
                 type: 'GET',
                 data: dataForm,
                 success: function (response) {
@@ -63,10 +62,9 @@ $(function () {
         addGradeAjax: function (dataForm) {
             var that = this;
             $.ajax({
+                type: 'POST',
                 url: this.baseUrl + '/api/add_grade',
-                dataType: 'JSONP',
-                jsonpCallback: 'callback',
-                type: 'GET',
+                dataType: 'json',
                 data: dataForm,
                 success: function (response) {
                     if (response.success) {
