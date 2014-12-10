@@ -21,6 +21,9 @@ $(function () {
             this._on(this.getGradesForm, {
                 'submit': 'submitGetGradesForm'
             });
+            this._on($('select', this.getGradesForm), {
+                'change': 'submitGetGradesForm'
+            });
             this._on(this.addGradeForm, {
                 'submit': 'submitAddGradeForm'
             });
@@ -148,26 +151,31 @@ $(function () {
         },
         gradeAverageChartGenerate: function (grades, subjects) {
             var averages = [];
+            var subjectToShow = $('.input-select-subject', this.getGradesForm).val();
 
             for (var i = 0; i < subjects.length; i++) {
-                var sum = 0, count = 0, avg = 0;
-                for (var j = 0; j < grades.length; j++) {
-                    if (grades[j].subjectId == subjects[i].id) {
-                        sum += grades[j].grade;
-                        count++;
+                if (subjectToShow == '*' || subjectToShow == subjects[i].id) {
+                    var sum = 0, count = 0, avg = 0;
+                    for (var j = 0; j < grades.length; j++) {
+                        if (grades[j].subjectId == subjects[i].id) {
+                            sum += grades[j].grade;
+                            count++;
+                        }
                     }
+                    if (count > 0) {
+                        avg = sum / count;
+                    }
+                    averages[i] = avg;
                 }
-                if (count > 0) {
-                    avg = sum / count;
-                }
-                averages[i] = avg;
             }
 
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Subject');
             data.addColumn('number', 'Average grade');
             for (var k = 0; k < subjects.length; k++) {
-                data.addRow([subjects[k].name, averages[k]]);
+                if (subjectToShow == '*' || subjectToShow == subjects[k].id) {
+                    data.addRow([subjects[k].name, averages[k]]);
+                }
             }
 
             this.gradeChart.draw(data, this.gradeChartOptions);
