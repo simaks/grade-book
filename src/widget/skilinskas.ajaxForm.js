@@ -2,8 +2,13 @@ $(function () {
     $.widget("skilinskas.ajaxForm", {
         options: {},
         _create: function () {
+            this.baseUrl = 'http://localhost:8000';
             this.url = this.element.attr('action');
             this.gradeTable = $('.table tbody');
+            this.getGradesForm = $('#get-grades-form');
+            this.addGradeForm = $('#add-grade-form');
+            this.inputSelectStudent = $('.input-select-student');
+            this.inputSelectSubject = $('.input-select-subject');
             this.gradeChart = new google.visualization.ColumnChart(document.getElementById('grade-average-chart'));
             this.gradeChartOptions = {
                 title: 'Subject averages',
@@ -12,51 +17,92 @@ $(function () {
                 vAxis: {gridlines: {count: 6}}
             };
 
-            this.submit();
+            this.submitGetGradesForm();
 
-            this._on(this.element, {
-                'submit': 'submit'
+            this._on(this.getGradesForm, {
+                'submit': 'submitGetGradesForm'
+            });
+            this._on(this.addGradeForm, {
+                'submit': 'submitAddGradeForm'
             });
         },
-        submit: function (event) {
+        submitGetGradesForm: function (event) {
             if (typeof event != 'undefined') {
                 event.preventDefault();
             }
-            this.ajax(this.element.serialize());
+            this.getGradesAjax(this.getGradesForm.serialize());
         },
-        ajax: function (dataForm) {
+        submitAddGradeForm: function (event) {
+            if (typeof event != 'undefined') {
+                event.preventDefault();
+            }
+            this.addGradeAjax(this.addGradeForm.serialize());
+        },
+        getGradesAjax: function (dataForm) {
             var that = this;
             $.ajax({
-                url: 'http://localhost:8000/api/grades',
+                url: this.baseUrl + '/api/grades',
+                dataType: 'JSONP',
+                jsonpCallback: 'callback',
+                type: 'GET',
+                data: dataForm,
+                success: function (response) {
+                    if (response.success && response.result.grades.length) {
+                        var dateFrom = new Date(response.result.grades[0].date);
+                        var dateTo = new Date(response.result.grades[response.result.grades.length - 1].date);
+                        that.gradeTableGenerate(response.result.grades, response.result.subjects, dateFrom, dateTo);
+                        that.gradeAverageChartGenerate(response.result.grades, response.result.subjects);
+                        that.updateStudentSelectInput(response.result.students);
+                        that.updateSubjectSelectInput(response.result.subjects);
+                    } else {
+                        alert('Failed to get any grades.');
+                    }
+                }
+            });
+        },
+        addGradeAjax: function (dataForm) {
+            var that = this;
+            $.ajax({
+                url: this.baseUrl + '/api/add_grade',
                 dataType: 'JSONP',
                 jsonpCallback: 'callback',
                 type: 'GET',
                 data: dataForm,
                 success: function (response) {
                     if (response.success) {
-                        that.gradeTableGenerate(response.result.grades, response.result.subjects);
-                        that.gradeAverageChartGenerate(response.result.grades, response.result.subjects);
+                        that.submitGetGradesForm();
+                        that.addGradeForm[0].reset();
+                    } else {
+                        alert('Failed to add grade!\n' + response.error);
                     }
                 }
             });
         },
-        gradeTableGenerate: function (grades, subjects) {
-            var dateFrom = new Date(grades[0].date);
-            var dateTo = new Date(grades[grades.length - 1].date);
-
+        gradeTableGenerate: function (grades, subjects, dateFrom, dateTo) {
             this.gradeTable.html('');
             var gradeTableRow = '';
             var gradeTableHead = '<td></td>';
 
             var d = getDates(dateFrom, dateTo);
+            var classAttr = '';
+            var dateFormat = '';
             for (var k = 0; k < d.length; k++) {
-                gradeTableHead += '<th>' + d[k].getDate() + '</th>';
+                dateFormat = pad(d[k].getDate(), 2) + '/' + pad(d[k].getMonth() + 1, 2);
+                classAttr = '';
+                if (d[k].getDate() == 1) {
+                    classAttr = ' class="first-day"';
+                }
+                gradeTableHead += '<th' + classAttr + '>' + dateFormat + '</th>';
             }
             for (var i = 0; i < d.length; i++) {
-                var dateFormat = d[i].getFullYear()
-                    + '-' + pad(d[i].getMonth() + 1, 2)
-                    + '-' + pad(d[i].getDate(), 2);
-                gradeTableRow += '<td data-date="' + dateFormat + '"></td>';
+                dateFormat = d[i].getFullYear()
+                + '-' + pad(d[i].getMonth() + 1, 2)
+                + '-' + pad(d[i].getDate(), 2);
+                classAttr = '';
+                if (d[i].getDate() == 1) {
+                    classAttr = ' class="first-day"';
+                }
+                gradeTableRow += '<td' + classAttr + ' data-date="' + dateFormat + '"></td>';
             }
 
             this.gradeTable.prepend('<tr class="table-dates">' + gradeTableHead + '</tr>');
@@ -85,15 +131,6 @@ $(function () {
             }
 
             var data = new google.visualization.DataTable();
-            //var data = google.visualization.arrayToDataTable([
-            //    ['Year', 'Sales', 'Expenses'],
-            //    ['2004',  1000,      400],
-            //    ['2005',  1170,      460],
-            //    ['2006',  660,       1120],
-            //    ['2007',  1030,      540]
-            //]);
-
-            //var array3 = array1.concat(array2);
             data.addColumn('string', 'Subject');
             data.addColumn('number', 'Average grade');
             for (var k = 0; k < subjects.length; k++) {
@@ -108,6 +145,20 @@ $(function () {
             if (cell.length > 0) {
                 cell.append(element.grade + ' ');
             }
+        },
+        updateStudentSelectInput: function (students) {
+            var options = '<option value="">-</option>';
+            for (var i = 0; i < students.length; i++) {
+                options += '<option value="' + students[i].id + '">' + students[i].name + ' ' + students[i].surname + '</option>';
+            }
+            this.inputSelectStudent.html(options);
+        },
+        updateSubjectSelectInput: function (subjects) {
+            var options = '<option value="">-</option>';
+            for (var i = 0; i < subjects.length; i++) {
+                options += '<option value="' + subjects[i].id + '">' + subjects[i].name + '</option>';
+            }
+            this.inputSelectSubject.html(options);
         }
     });
 });
